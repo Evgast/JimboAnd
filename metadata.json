@@ -1,0 +1,11 @@
+{
+	"id": "jand",
+	"name": "Jimbo&!",
+	"author": ["Evgast!"],
+	"description": "Every day is certainly a day",
+	"prefix": "jand",
+	"main_file": "main.lua",
+	"priority": 0,
+	"badge_colour": "#8d1a91",
+	"version": "0.1.0"
+}
