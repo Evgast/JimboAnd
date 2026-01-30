@@ -49,7 +49,6 @@ SMODS.Joker {
 		return { vars = { card.ability.extra.numerator_gain } }
 	end,
 	calculate = function(self, card, context)
-        card.states.drag.can = false
         if context.starting_shop then
             local boost = SMODS.create_card{set = "Booster"}
             local boost_to_create = {}
@@ -360,35 +359,42 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = true,
-	config = { extra = { mult = 0, mult_gain = 8, to_play = 3, why = nil } },
+	config = { extra = { mult = 0, mult_gain = 8, to_play = 3, remaining = 3, why = nil, lhp = "None" } },
 	loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain, card.ability.extra.to_play, G.GAME.last_hand_played } } 
+        return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain, card.ability.extra.to_play, card.ability.extra.remaining, card.ability.extra.lhp } } 
 	end,
 	calculate = function(self, card, context)
+        if G.GAME.last_hand_played then
+            card.ability.extra.lhp = G.GAME.last_hand_played
+        end
         if context.press_play and G.GAME.last_hand_played then
             card.ability.extra.why = G.GAME.last_hand_played
         end
-        if context.before and card.ability.extra.why and context.scoring_name and not context.blueprint then
-            if (G.GAME.hands[context.scoring_name].order < G.GAME.hands[card.ability.extra.why].order) or not card.ability.extra.why then
-                card.ability.extra.to_play = card.ability.extra.to_play - 1
-                if card.ability.extra.to_play <= 0 then
-                    card.ability.extra.to_play = 3
-                    SMODS.scale_card(card, {
-                        ref_table = card.ability.extra,
-                        ref_value = "mult",
-                        scalar_value = "mult_gain",
-                        scaling_message = {
-                            message = "+"..card.ability.extra.mult_gain,
-                            colour = G.C.MULT
-                        }
-                    })
+        if context.before and context.scoring_name and not context.blueprint then
+            if card.ability.extra.why then
+                if (G.GAME.hands[context.scoring_name].order < G.GAME.hands[card.ability.extra.why].order) or not card.ability.extra.why then
+                    card.ability.extra.remaining = card.ability.extra.remaining - 1
+                    if card.ability.extra.remaining <= 0 then
+                        card.ability.extra.remaining = 3
+                        SMODS.scale_card(card, {
+                            ref_table = card.ability.extra,
+                            ref_value = "mult",
+                            scalar_value = "mult_gain",
+                            scaling_message = {
+                                message = "+"..card.ability.extra.mult_gain,
+                                colour = G.C.MULT
+                            }
+                        })
+                    end
                 end
-            end
-            if (G.GAME.hands[context.scoring_name].order >= G.GAME.hands[card.ability.extra.why].order) and not context.blueprint then
-                card.ability.extra.to_play = 3
-                return {
-                    message = "Ah..."
-                }
+                if (G.GAME.hands[context.scoring_name].order >= G.GAME.hands[card.ability.extra.why].order) and not context.blueprint then
+                    card.ability.extra.remaining = 2
+                    return {
+                        message = "Ah..."
+                    }
+                end
+            else
+                card.ability.extra.remaining = card.ability.extra.remaining - 1
             end
         end
         if context.joker_main then

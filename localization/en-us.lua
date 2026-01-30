@@ -12,8 +12,8 @@ return {
                 j_jand_jumbo = {
                     name = "Jumbo",
 		            text = {
-                "{C:attention}Shops{} contain additional",
-                "{C:attention}Jumbo Booster Packs{}"
+                "{C:attention}Shop{} contains an additional",
+                "{C:attention}Jumbo Booster Pack{}"
 		            }
                 },
                 j_jand_yomi = {
@@ -94,7 +94,8 @@ return {
                 "each of higher {C:attention}rank{} than previous,",
                 "Gains {C:mult}#2#{} Mult",
                 "{C:inactive}(Currently: {C:mult}#1#{C:inactive})",
-                "{C:inactive}(Previous hand: #4#)"
+                "{C:inactive}(Hands remaining: #4#)",
+                "{C:inactive}(Previous hand: #5#)"
                     },
                 },
                 j_jand_andagi = {
