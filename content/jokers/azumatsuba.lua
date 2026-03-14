@@ -7,6 +7,7 @@ SMODS.Joker {
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,
+    jand_gemini_compat = false,
 	config = { extra = { numerator = 0, numerator_gain = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.numerator_gain } }
@@ -44,6 +45,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = true,
+    jand_gemini_compat = false,
 	config = { extra = { numerator = 0, numerator_gain = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.numerator_gain } }
@@ -77,6 +79,8 @@ SMODS.Joker {
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,
+    jand_gemini_compat = false,
+    jand_scratched_compat = false
 }
 
 SMODS.Joker {
@@ -87,63 +91,63 @@ SMODS.Joker {
 	cost = 4,
 	blueprint_compat = true,
 	eternal_compat = true,
-	perishable_compat = true,
-	config = { extra = { mult = 0, mult_gain = 2, tomo_slot = 1 } },
+	perishable_compat = false,
+    jand_slippery_compat = false,
+	config = { immovable = true, extra = { mult = 0, mult_gain = 2, tomo_slot = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain} }
 	end,
-    update = function(self, card, dt)
+    add_to_deck = function(self, card, from_debuff)
+        if not from_debuff then
+            G.E_MANAGER:add_event(Event({
+            func = function() 
+                card.ability.extra.tomo_slot = JAND.swap_cards(card, "leftmost")
+                return true 
+            end
+            }))
+        end
+    end,
+	calculate = function(self, card, context)
         local my_pos = nil
-        if card.area == G.jokers then
         for i = 1, #G.jokers.cards do
             if G.jokers.cards[i] == card then
                 my_pos = i
             end
         end
-        if G.jokers.cards[card.ability.extra.tomo_slot] ~= G.jokers.cards[my_pos] then
-            G.jokers.cards[card.ability.extra.tomo_slot], G.jokers.cards[my_pos] = G.jokers.cards[my_pos], G.jokers.cards[card.ability.extra.tomo_slot]
-        end
-        end
-    end,
-	calculate = function(self, card, context)
         if not context.blueprint then
             card.states.drag.can = false
-            local my_pos = nil
-            for i = 1, #G.jokers.cards do
-                if G.jokers.cards[i] == card then
-                    my_pos = i
-                end
-            end
-            if context.before and not context.blueprint then
+            if context.press_play then
                 G.E_MANAGER:add_event(Event({
-                func = function() 
-                    if G.jokers.cards[#G.jokers.cards] ~= card then
-                        card.ability.extra.tomo_slot = my_pos+1
+                    func = function() 
+                        card.ability.extra.tomo_slot = JAND.swap_cards(card, "adjacent", 1, true)
+                        SMODS.scale_card(card, {
+                            ref_table = card.ability.extra,
+                            ref_value = "mult",
+                            scalar_value = "mult_gain",
+                            scaling_message = {
+                                message = "+"..card.ability.extra.mult_gain,
+                                colour = G.C.MULT
+                            }
+                        })
+                        return true 
                     end
-                    return true 
-                end
                 }))
-                SMODS.scale_card(card, {
-                    ref_table = card.ability.extra,
-                    ref_value = "mult",
-                    scalar_value = "mult_gain",
-                    scaling_message = {
-                        message = "+"..card.ability.extra.mult_gain,
-                        colour = G.C.MULT
-                    }
-                })
-                return true 
             end
-            if context.pre_discard and not context.blueprint then
-                if G.jokers.cards[1] ~= card then
-                    card.ability.extra.tomo_slot = my_pos-1
-                end
+            if context.pre_discard then
+                card.ability.extra.tomo_slot = JAND.swap_cards(card, "adjacent", -1, true)
             end
         end
         if context.joker_main then
             return {
                 mult = card.ability.extra.mult
             }
+        end
+        if card.ability.extra.tomo_slot and my_pos ~= card.ability.extra.tomo_slot then
+            if my_pos > card.ability.extra.tomo_slot then
+                JAND.swap_cards(card, "adjacent", -1, true)
+            elseif my_pos < card.ability.extra.tomo_slot then
+                JAND.swap_cards(card, "adjacent", 1, true)
+            end
         end
     end
 }
@@ -156,7 +160,7 @@ SMODS.Joker {
 	cost = 7,
 	blueprint_compat = true,
 	eternal_compat = true,
-	perishable_compat = true,
+	perishable_compat = false,
 	config = { extra = { xmult = 1, xmult_gain = 0.25, odds = 4, suit = "Hearts" } },
 	loc_vars = function(self, info_queue, card)
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'chichi')
@@ -192,6 +196,7 @@ SMODS.Joker {
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,
+    jand_gemini_compat = false,
 	config = { extra = { to_copy = nil, } },
 	loc_vars = function(self, info_queue, card)
         if card.area and card.area == G.jokers then
@@ -259,7 +264,7 @@ SMODS.Joker {
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = true,
-	perishable_compat = true,
+	perishable_compat = false,
 	config = { extra = { chips = 0, chips_gain = 0, highest_rank = 0, ready = false } },
 	loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.chips, localize("Straight", 'poker_hands') } } 
@@ -358,7 +363,7 @@ SMODS.Joker {
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = true,
-	perishable_compat = true,
+	perishable_compat = false,
 	config = { extra = { mult = 0, mult_gain = 8, to_play = 3, remaining = 3, why = nil, lhp = "None" } },
 	loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain, card.ability.extra.to_play, card.ability.extra.remaining, card.ability.extra.lhp } } 

@@ -2,21 +2,66 @@ local highlight_hooky = Card.highlight
 function Card:highlight(is_highlighted)
     highlight_hooky(self, is_highlighted)
     local danbo_use = {n = G.UIT.ROOT, config = { minw = 1, minh = 1, align = "tm", colour = G.C.CLEAR}, nodes = {
-	            {n = G.UIT.C, config = { minw = 1, minh = 1, colour = G.C.CLEAR, r = 0.1, padding = 0.15, func = "recalc" }, nodes = {
+	            {n = G.UIT.C, config = { minw = 1, minh = 1, colour = G.C.CLEAR, r = 0.1, padding = 0.15, func = "jand_recalc" }, nodes = {
                     UIBox_button{ label = {localize("b_use")}, scale = 0.6, minw = 1.5, minh = 1, colour = G.C.BLACK, r = 0.1, button = nil, ref_table = self, func = "danboskill", shadow = true},
             }}}}
-        if self.highlighted and self.config.center.key == "j_jand_danbo" and not self.ability.extra.to_copy then
-            self.children.danbo_button = UIBox({    
-                definition = danbo_use,
-                config = {
-                parent = self,
-                align = 'tm',
-                offset = { x = 0, y = 3.55 },
-                colour = G.C.CLEAR}})
-        elseif self.children.danbo_button and not self.highlighted and self.config.center.key == "j_jand_danbo" then
-            self.children.danbo_button:remove()
-            self.children.danbo_button = nil
-        end
+    local lv_buy = { n=G.UIT.ROOT, config = {ref_table = card, minw = 1.1, maxw = 1.3, padding = 0.1, align = 'bm', colour = G.C.SECONDARY_SET.Planet, shadow = true, r = 0.08, minh = 0.94, hover = true, ref_value = self, func = "can_buy_lv", button = "buy_lv_butt"}, nodes={
+                {n=G.UIT.T, config={text = localize('b_buy'),colour = G.C.WHITE, scale = 0.5}}
+            }}
+    local sacrifice = {n = G.UIT.ROOT, config = { minw = 1, minh = 1, align = "tm", colour = G.C.CLEAR}, nodes = {
+	            {n = G.UIT.C, config = { minw = 1, minh = 1, colour = G.C.CLEAR, r = 0.1, padding = 0.15,  }, nodes = {
+                    UIBox_button{ label = {"SACRIFICE"}, scale = 0.6, minw = 1.5, minh = 1, colour = G.C.BLACK, r = 0.1, button = nil, ref_table = self, func = "sacrifunc", shadow = true},
+            }}}}
+    --danbo
+    if self.highlighted and self.config.center.key == "j_jand_danbo" and not self.ability.extra.to_copy then
+        self.children.danbo_button = UIBox({    
+            definition = danbo_use,
+            config = {
+            parent = self,
+            align = 'tm',
+            offset = { x = 0, y = 3.55 },
+            colour = G.C.CLEAR}})
+    elseif self.children.danbo_button and not self.highlighted and self.config.center.key == "j_jand_danbo" then
+        self.children.danbo_button:remove()
+        self.children.danbo_button = nil
+    end
+    --hand level shop buy
+    if self.highlighted and self.children.lv_price and not self.children.buy_lv then
+        self.children.buy_lv = UIBox{
+            definition = lv_buy,
+            config = {
+                align="bm",
+                offset = {x=0,y=-0.35},
+                major = self,
+                bond = 'Weak',
+                parent = self
+                }
+            }
+    elseif self.children.buy_lv and not self.highlighted then
+        self.children.buy_lv:remove()
+        self.children.buy_lv = nil
+    end
+    --hand level sacrifice
+    if self.highlighted and self.sacrifice then
+        self.children.use_button= UIBox{
+            definition = sacrifice,
+            config = {
+                align="bm",
+                offset = {x=0,y=-0.35},
+                major = self,
+                bond = 'Weak',
+                parent = self
+                }
+            }
+    elseif self.sacrifice and self.children.use_button and not self.highlighted then
+        self.children.use_button:remove()
+        self.children.use_button = nil
+    end
+    --I might be an idiot but yeah
+    if self.highlighted and self.area.config.jand_no_use and self.children.use_button then
+        self.children.use_button:remove()
+        self.children.use_button = nil
+    end
 end
 
 local align_hooky = CardArea.align_cards
@@ -52,4 +97,34 @@ function SMODS.scale_card(card, args)
 		end
 	end
 	scale_hook(card, args)
+end
+
+local start_run_ref = Game.start_run
+function Game:start_run(args)
+    start_run_ref(self, args)
+    extra_shop_create()
+    if not G.GAME.stocked then
+        restock_extra_shop()
+    end
+    for k, v in pairs(G.jand_shopkeep.cards) do
+		v.config.center:apply()
+	end
+    G.GAME.stocked = true
+end
+
+
+local use_hook = G.FUNCS.use_card
+function G.FUNCS.use_card(e, mute, nosave)
+    use_hook(e, mute, nosave)
+    if G.GAME.current_shop == "Jand" then
+        JAND.hide_shop(G.extra_shop)
+        G.E_MANAGER:add_event(Event({
+            trigger = "after", 
+            delay = 0.3, 
+            func = function() 
+                JAND.show_shop(G.extra_shop)
+                return true 
+            end
+        }))
+    end
 end

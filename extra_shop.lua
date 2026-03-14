@@ -1,0 +1,469 @@
+
+function G.FUNCS.your_collection_shopkeepers()
+	G.SETTINGS.paused = true
+	G.your_collection_sk = CardArea(
+      	0,0,
+      	5*G.CARD_W,
+      	0.95*G.CARD_H, 
+      	{card_limit = 5, type = 'title', highlight_limit = 0}
+	)
+	for i=1, 5 do
+		local key = G.P_CENTER_POOLS["jand_sk"][i].key
+		local card = SMODS.create_card({set = "jand_sk", area = G.your_collection_sk, key = key, key_append = "jand_sk", no_edition = true})
+      	G.your_collection_sk:emplace(card)
+	end
+	local keepers_options = {}
+	for i=1, math.ceil(#G.P_CENTER_POOLS["jand_sk"]/5) do
+		table.insert(keepers_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#G.P_CENTER_POOLS["jand_sk"]/5)))
+	end
+  	G.FUNCS.overlay_menu{
+    	definition = create_UIBox_generic_options({
+        contents = {
+			{ n = G.UIT.C, config = {minw=1, minh=1, colour = G.C.CLEAR }, nodes = {
+                { n = G.UIT.R, config={align = "cm", r = 0.1, colour = G.C.BLACK, emboss = 0.05 }, nodes={
+					{ n = G.UIT.O, config={object = G.your_collection_sk}}
+				}}, 
+                { n = G.UIT.R, config={align = "cm"}, nodes={
+                    create_option_cycle({options = keepers_options, w = 4.5, cycle_shoulders = true, opt_callback = 'sk_collection_slider', current_option = 1, colour = G.C.RED, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}})
+        		}}
+			}},
+		}
+		}), 
+  	}
+end
+
+G.FUNCS.sk_collection_slider = function(args)
+  	if not args or not args.cycle_config then return end
+	for i=1, #G.your_collection_sk.cards do
+		local c = G.your_collection_sk:remove_card(G.your_collection_sk.cards[i])
+		c:remove()
+	end
+	for i=1, 5 do
+		if G.P_CENTER_POOLS["jand_sk"][((args.cycle_config.current_option-1)*5)+i] then
+			local key = G.P_CENTER_POOLS["jand_sk"][((args.cycle_config.current_option-1)*5)+i].key
+			local card = SMODS.create_card({set = "jand_sk", area = G.your_collection_sk, key = key, key_append = "jand_sk", no_edition = true})
+			G.your_collection_sk:emplace(card)
+		end
+	end
+end
+
+function JAND.show_shop(shop)
+    if shop and shop.alignment.offset.ppy then --double p to separate from py. Makes life easier I think
+      shop.alignment.offset.y = shop.alignment.offset.ppy
+      shop.alignment.offset.ppy = nil
+    end
+end
+
+function JAND.hide_shop(shop)
+    if shop and not shop.alignment.offset.ppy then
+      shop.alignment.offset.ppy = shop.alignment.offset.y
+      shop.alignment.offset.y = G.ROOM.T.y + 29
+    end
+end
+
+function G.UIDEF.extra_shop()
+	local loc = {}
+	local quip = {}
+	localize{type = "descriptions", key = "shopkeep_oopsie", set = "ShopQuips", default_col = G.C.UI.TEXT_DARK, nodes = loc, vars = {}, scale = 1}
+	quip = {transparent_multiline_text(loc)}
+	t = {n = G.UIT.ROOT, config = {r = 0.1, minw = 1, minh = 1, align = "tm", colour = G.C.CLEAR}, nodes = {
+        UIBox_dyn_container({
+			{n = G.UIT.C, config = {colour = G.C.BLACK, r = 0.1, align = "cm"}, nodes = {
+				{n = G.UIT.R, config = {colour = G.C.CLEAR, align = "cm", padding = 0.3}, nodes = {
+					{n=G.UIT.C, config= { colour = G.C.CLEAR, w = 1, h = 1, align = "cm" }, nodes={
+						{n = G.UIT.O, config = {object = G.jand_shopkeep}},
+					}},
+					{n=G.UIT.C, config = {align = "cm", minh = 1, minw = 5, r = 0.3, padding = 0.07, colour = G.C.JOKER_GREY, shadow = true}, nodes={
+						{n=G.UIT.R, config={align = "cm", minh = G.CARD_H --[[just trust the process]], minw = 5, r = 0.2, padding = 0.1, func = "shop_quip_func", colour = G.C.WHITE}, nodes=
+							quip
+						}
+					}},
+					{n=G.UIT.C, config= { button = "extra_shop_swap", colour = G.C.GREEN, minw = G.CARD_W, h = 1, r = 0.1, align = "cm" }, nodes={
+						{n=G.UIT.T, config={text = "Return", colour = G.C.UI.TEXT_LIGHT, scale = 0.5}}
+					}}
+				}},
+				{n = G.UIT.R, config = {colour = G.C.L_BLACK, align = "cl", r = 0.1}, nodes = {
+					{n = G.UIT.O, config = {object = G.jand_shop}},
+				}},
+			}},
+			
+		})
+	}}
+    return t
+end
+
+function G.FUNCS.shop_quip_func(e)
+	if e.children and e.children[1] and G.update_quipbox then
+		local loc = {}
+		local quip = {}
+		localize{type = "descriptions", key = G.GAME.shop_quip, set = "ShopQuips", default_col = G.C.UI.TEXT_DARK, nodes = loc, vars = {}, scale = 1.5}
+		quip = {transparent_multiline_text(loc)}
+		G.update_quipbox = false
+		e.children[1]:remove()
+		e.children[1] = nil
+		local new_quip = {n=G.UIT.C, config = {align = "cm", colour = G.C.CLEAR}, nodes=
+							quip
+						}
+		e.UIBox:add_child(new_quip, e)
+	end
+end
+
+function JAND.update_quipbox()
+	if G.jand_shopkeep and G.jand_shopkeep.cards[1] then
+		local card = G.jand_shopkeep.cards[1]
+		G.GAME.shop_quip = card.config.center.key .. "_" .. math.random(1, card.ability.quips)
+	else
+		G.GAME.shop_quip = "shopkeep_oopsie"
+	end
+	G.update_quipbox = true
+end
+
+function G.FUNCS.extra_shop_swap()
+	if G.GAME.current_shop == "Vanilla" or G.GAME.current_shop == nil then
+		JAND.hide_shop(G.shop)
+		JAND.show_shop(G.extra_shop)
+		G.GAME.current_shop = "Jand"
+	else
+		JAND.hide_shop(G.extra_shop)
+		JAND.show_shop(G.shop)
+		G.GAME.current_shop = "Vanilla"
+	end
+	JAND.remove_from_used(G.GAME.current_shop)
+end
+
+function JAND.remove_from_used(current_shop)
+	if current_shop == "Vanilla" then
+		if G.shop then
+			for k, base_jokers in pairs(G.shop_jokers.cards) do
+				G.GAME.used_jokers[base_jokers.config.center.key] = true
+			end
+			for k, boosters in pairs(G.shop_booster.cards) do
+				G.GAME.used_jokers[boosters.config.center.key] = true
+			end
+			for k, vouchers in pairs(G.shop_vouchers.cards) do
+				G.GAME.used_jokers[vouchers.config.center.key] = true
+			end
+		end
+		for k, jand_cards in pairs(G.jand_shop.cards) do
+			G.GAME.used_jokers[jand_cards.config.center.key] = nil
+		end
+	end
+	if current_shop == "Jand" then
+		for k, base_jokers in pairs(G.shop_jokers.cards) do
+			if G.GAME.used_jokers[base_jokers.config.center.key] then
+				G.GAME.used_jokers[base_jokers.config.center.key] = nil
+			end 
+		end
+		for k, boosters in pairs(G.shop_booster.cards) do
+			if G.GAME.used_jokers[boosters.config.center.key] then
+				G.GAME.used_jokers[boosters.config.center.key] = nil
+			end 
+		end
+		for k, vouchers in pairs(G.shop_vouchers.cards) do
+			if G.GAME.used_jokers[vouchers.config.center.key] then
+				G.GAME.used_jokers[vouchers.config.center.key] = nil
+			end 
+		end
+		for k, jand_cards in pairs(G.jand_shop.cards) do
+			G.GAME.used_jokers[jand_cards.config.center.key] = true
+		end
+	end
+	for k, your_jokers in pairs(G.jokers.cards) do
+		G.GAME.used_jokers[your_jokers.config.center.key] = true
+	end
+	for k, your_consume in pairs(G.consumeables.cards) do
+		G.GAME.used_jokers[your_consume.config.center.key] = true
+	end
+end
+
+function extra_shop_create()
+	G.extra_shop = UIBox{
+		definition = G.UIDEF.extra_shop(),
+		config = {align='tmi', offset = {x=0,y=G.ROOM.T.y+29,ppy=-5},major = G.hand, bond = 'Weak'} --Is this fucking dumb
+	}
+end
+
+function nikola_card_ui(card)
+	if card.config.center.set == "Joker" then
+		if card.config.center.rarity == 4 then
+			card.lv = 10
+		elseif card.config.center.rarity == 3 then
+			card.lv = 3
+		elseif card.config.center.rarity == 2 or 1 then
+			card.lv = 2
+		end
+	else
+		card.lv = 1
+	end
+	local t1 = {
+        n=G.UIT.ROOT, config = {minw = 0.6, align = 'tm', colour = darken(G.C.BLACK, 0.2), shadow = true, r = 0.05, padding = 0.05, minh = 1}, nodes={
+            {n=G.UIT.R, config={align = "cm", colour = lighten(G.C.BLACK, 0.1), r = 0.1, minw = 1, minh = 0.55, emboss = 0.05, padding = 0.03}, nodes={
+                {n=G.UIT.O, config={object = DynaText({string = {{prefix = "LV", ref_table = card, ref_value = 'lv'}}, colours = {G.C.SECONDARY_SET.Planet},shadow = true, silent = true, bump = true, pop_in = 0, scale = 0.5})}},
+            }}
+        }}
+	card.children.lv_price = UIBox{
+        definition = t1,
+        config = {
+            align="tm",
+            offset = {x=0,y=0.42},
+            major = card,
+            bond = 'Weak',
+            parent = card
+        }
+    }
+end
+
+function remove_vanilla_price(card)
+	if card.children.price then 
+		card.children.price:remove()
+        card.children.price = nil
+	end
+    if card.children.buy_button then 
+		card.children.buy_button:remove()
+        card.children.buy_button = nil
+	end
+end
+
+G.FUNCS.can_buy_lv = function(e)
+    if get_hand_levels() >= e.config.ref_value.lv then
+		e.config.colour = G.C.SECONDARY_SET.Planet
+		e.config.button = "buy_lv_butt"
+	else
+		e.config.colour = G.C.BLACK
+		e.config.button = nil
+	end
+end
+
+local do_that = function(card)
+	for k, v in pairs(G.GAME.hands) do
+		if card.ability.hand_type == v.key then
+			card.planet_lv = v.level
+		end
+	end
+	if card.planet_lv and  card.planet_lv <= 1 then
+		card.debuff = true
+	end
+	card.sacrifice = true
+	card.T.w = card.T.w / 2
+	card.T.h = card.T.h / 2
+end
+
+G.FUNCS.buy_lv_butt = function(e)
+	G.lv_payment = CardArea(
+		0, 0, (G.CARD_W/2) * 5.01, (G.CARD_H/2) * 1.1,
+        {
+            card_limit = e.config.ref_value.lv, 
+            type = 'joker', 
+            highlight_limit = 0, 
+        }
+	)
+	G.lv_choice = {}
+	local planet_rows = {}
+	for i = 1, 3 do
+		G.lv_choice[#G.lv_choice+1] = CardArea(
+			0, 0, (G.CARD_W/2) * 5.01, (G.CARD_H/2) * 1.1,
+			{
+				card_limit = 5, 
+				type = 'shop', 
+				highlight_limit = 5, 
+				no_card_count = true 
+			}	
+		)
+		table.insert(planet_rows, {n = G.UIT.R, config = {align = "cm"}, nodes = {
+   			{n=G.UIT.O, config={object = G.lv_choice[#G.lv_choice]}}
+		}}
+		)
+	end
+	local area_row = 1
+	local space_racism = {}
+	for i=1, #G.P_CENTER_POOLS["Planet"] do
+		if G.P_CENTER_POOLS["Planet"][i].config.hand_type then
+			space_racism[#space_racism+1] = G.P_CENTER_POOLS["Planet"][i]
+		end
+	end
+	for i = 1, #space_racism do
+		if i<=15 then
+			if #G.lv_choice[area_row].cards >= 5 then
+				area_row = area_row + 1
+			end
+			local key = space_racism[i].key
+			local card = SMODS.create_card({area = G.lv_choice[area_row], key = key, bypass_discovery_center = true})
+			if card.ability.hand_type then
+				G.lv_choice[area_row]:emplace(card)
+				do_that(card)
+			else
+				card:remove()
+			end
+		end
+	end
+	local sacrifice_options = {}
+	for i=1, math.ceil(#space_racism/15) do
+		table.insert(sacrifice_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#space_racism/15)))
+	end
+	G.FUNCS.overlay_menu({
+    definition = create_UIBox_generic_options({
+        contents = {
+			{n = G.UIT.C, config = {align = "cm", padding = 0.3}, nodes = {
+				{n = G.UIT.R, config = {align = "cm"}, nodes = {
+					{n=G.UIT.O, config={object = G.lv_payment}},
+				}},
+				{n = G.UIT.R, config = {align = "cm"}, nodes = {
+					{n = G.UIT.C, config = {align = "cm"}, nodes = planet_rows}
+				}},
+                create_option_cycle({options = sacrifice_options, w = 4.5, cycle_shoulders = true, opt_callback = 'sacrifice_pages', current_option = 1, colour = G.C.SECONDARY_SET.Planet, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}}),
+				UIBox_button{ label = {"Confirm"}, scale = 0.6, minw = 5, maxh = 1, colour = G.C.BLACK, r = 0.1, ref_table = e.config.ref_value --[[What is he doing lmao]], button = nil, func = "sacrifice_update", shadow = true}
+			}},
+		}
+	})
+    })
+end
+
+G.FUNCS.sacrifice_pages = function(args)
+  	if not args or not args.cycle_config then return end
+	for i=1, #G.lv_choice do
+		for card=1, #G.lv_choice[i].cards do
+			local c = G.lv_choice[i]:remove_card(G.lv_choice[i].cards[card])
+			c:remove()
+		end
+	end
+	local area_row = 1
+	local space_racism = {}
+	for i=1, #G.P_CENTER_POOLS["Planet"] do
+		if G.P_CENTER_POOLS["Planet"][i].config.hand_type then
+			space_racism[#space_racism+1] = G.P_CENTER_POOLS["Planet"][i]
+		end
+	end
+	for i=1, #space_racism do
+		if (i > (args.cycle_config.current_option-1)*15) and (i <= args.cycle_config.current_option*15) then
+			if #G.lv_choice[area_row].cards >= 5 then
+				area_row = area_row + 1
+			end
+			local key = space_racism[i].key
+			local card = SMODS.create_card({area = G.lv_choice[area_row], key = key, bypass_discovery_center = true})
+			if card.ability.hand_type then
+				G.lv_choice[area_row]:emplace(card)
+				do_that(card)
+			else
+				card:remove()
+			end
+		end
+	end
+end
+
+function G.FUNCS.sacrifice_update(e)
+	if G.lv_payment and #G.lv_payment.cards == G.lv_payment.config.card_limit then
+		e.config.colour = G.C.SECONDARY_SET.Planet
+		e.config.button = "sacrifice_confirm"
+	else
+		e.config.colour = G.C.BLACK
+		e.config.button = nil
+	end
+end
+
+function G.FUNCS.sacrifice_confirm(e)
+	for i=1, #G.lv_payment.cards do
+		SMODS.smart_level_up_hand(nil, G.lv_payment.cards[i].ability.hand_type, false, -1)
+	end
+	local card = e.config.ref_table
+	G.FUNCS.exit_overlay_menu()
+	card.area:remove_card(card)
+    card:add_to_deck()
+	if card.ability.consumeable then
+        G.consumeables:emplace(card) --not even planning to use it for consum(e)ables but just in case
+    else
+        G.jokers:emplace(card)
+    end
+	card.lv = nil
+	card.children.lv_price:remove()
+	card.children.lv_price = nil
+	--tallies for unlocks, copied from vanilla
+	G.GAME.round_scores.cards_purchased.amt = G.GAME.round_scores.cards_purchased.amt + 1
+    if card.ability.consumeable then
+        if card.config.center.set == 'Planet' then
+            inc_career_stat('c_planets_bought', 1)
+        elseif card.config.center.set == 'Tarot' then
+        	inc_career_stat('c_tarots_bought', 1)
+        end
+    elseif card.ability.set == 'Joker' then
+        G.GAME.current_round.jokers_purchased = G.GAME.current_round.jokers_purchased + 1
+    end
+end
+
+function G.FUNCS.sacrifunc(e)
+	if G.lv_payment and #G.lv_payment.cards < G.lv_payment.config.card_limit and e.config.ref_table.planet_lv > 1 then
+		e.config.colour = G.C.MULT
+		e.config.button = "sacributt"
+	else
+		e.config.colour = G.C.BLACK
+		e.config.button = nil
+	end
+end
+
+function G.FUNCS.sacributt(e)
+	local card = SMODS.create_card({key = e.config.ref_table.config.center.key, area = G.lv_payment, bypass_discovery_center = true})
+	e.config.ref_table.planet_lv = e.config.ref_table.planet_lv - 1
+	if e.config.ref_table.planet_lv <= 1 then
+		e.config.ref_table.debuff = true
+	end
+	G.lv_payment:emplace(card)
+	card.T.w = e.config.ref_table.T.w
+	card.T.h = e.config.ref_table.T.h
+end
+
+function get_hand_levels()
+	local t = 0
+	for k, v in pairs(G.GAME.hands) do
+		t = t + v.level - 1
+	end
+	return t
+end
+
+function create_nikola_card(type, area, rarity, key)
+	if not area then
+		area = G.jokers
+	end
+	local card = SMODS.create_card({set = type or "Joker", area = area, rarity = rarity or nil, bypass_discovery_center = true, key = key or nil})
+	area:emplace(card)
+	nikola_card_ui(card)
+	return card
+end
+
+function JAND.add_booster_to_area(key, area)
+    if key then assert(G.P_CENTERS[key], "Invalid booster key: "..key) else key = get_pack('shop_pack').key end
+    local card = Card(area.T.x + area.T.w/2,
+    area.T.y, G.CARD_W*1.27, G.CARD_H*1.27, G.P_CARDS.empty, G.P_CENTERS[key], {bypass_discovery_center = true, bypass_discovery_ui = true})
+    create_shop_card_ui(card, 'Booster', area)
+    card:start_materialize()
+    area:emplace(card)
+    return card
+end
+
+function restock_extra_shop(key)
+	for k, v in pairs(G.jand_shopkeep.cards) do
+		v:remove()
+	end
+	local shopkeep = SMODS.create_card({set = "jand_sk", area = G.jand_shopkeep, key = key or nil, key_append = "jand_sk", no_edition = true})
+	for k, v in pairs(G.jand_shop.cards) do
+		G.E_MANAGER:add_event(Event({
+    	func = function() 
+        	v:remove()
+        	return true 
+    	end
+		}))
+	end
+	G.jand_shopkeep:emplace(shopkeep)
+	shopkeep.config.center:restock()
+	shopkeep.config.center:apply()
+	G.jand_shop.config.card_limit = shopkeep.ability.card_amount + 1 --it looks better this way TRUST
+	G.GAME.shopname = shopkeep.ability.shopname
+	JAND.update_quipbox()
+end
+
+SMODS.Keybind {
+	key_pressed = 'g',
+	action = function(self)
+		if G.STATE == G.STATES.SHOP then
+			G.FUNCS.extra_shop_swap()
+		end
+	end
+}

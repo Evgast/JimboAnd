@@ -1,0 +1,12 @@
+Yo yo yo I fricking suuuuuckkkkk
+This txt is here if you want to add compatibility stuff with your mod yourself, I'll just list the stuff my dumb ass finds important
+-Yomi requires your food jokers to be in the "Food" pool
+-Sooo... That Gemini sticker... Is pretty dumb. For it to be applicable the Joker needs to have number values (I added them all manually to the exception list :sob:),
+it also can't be applied to scaling Jokers (Checking for perishable incompat :з) or food (FOOD POOL). 'jand_gemini_compat = false' does the thing
+-Slippery sticker doesn't want to be on self-moving Jokers, 'jand_slippery_compat = false'
+-Shopkeepers are technically Jokers. That's just a thing. If you want to make your own shopkeeper check shopkeepers>gimmiko.lua, currently the function
+for them is defined there
+-If you have a card that can't be moved you might want to set card.ability.immovable to true. It doesn't have a functionality and only needed for my card swapping function
+
+
+I. Didn't realize how needy my mod is holy.

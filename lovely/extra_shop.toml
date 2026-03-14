@@ -1,0 +1,48 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+    {n=G.UIT.R,config={id = 'next_round_button', align = "cm", minw = 2.8, minh = 1.5, r=0.15,colour = G.C.RED, one_press = true, button = 'toggle_shop', hover = true,shadow = true}, nodes = {
+'''
+position = "at"
+payload = '''
+    {n=G.UIT.R,config={id = 'next_round_button', align = "cm", minw = 2.8, minh = 1, r=0.15,colour = G.C.RED, one_press = true, button = 'toggle_shop', hover = true,shadow = true}, nodes = {
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+    {n=G.UIT.R, config={align = "cm", minw = 2.8, minh = 1.6, r=0.15,colour = G.C.GREEN, button = 'reroll_shop', func = 'can_reroll', hover = true,shadow = true}, nodes = {
+'''
+position = "at"
+payload = '''
+    {n=G.UIT.R, config={align = "cm", minw = 2.8, minh = 1, r=0.15,colour = G.C.GREEN, button = 'reroll_shop', func = 'can_reroll', hover = true,shadow = true}, nodes = {
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+                                {n=G.UIT.T, config={ref_table = G.GAME.current_round, ref_value = 'reroll_cost', scale = 0.75, colour = G.C.WHITE, shadow = true}},
+                                }}
+                            }}
+                        }},
+'''
+position = "after"
+payload = '''
+    {n=G.UIT.R, config={align = "cm", maxw = 2.8, minh = 1, r=0.15,colour = G.C.BLUE, button = 'extra_shop_swap', hover = true,shadow = true}, nodes = {
+        {n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
+            {n=G.UIT.T, config={text = G.GAME.shopname or "fuck up", scale = 1, colour = G.C.WHITE, shadow = true}},
+        }}               
+    }}
+'''
+match_indent = true
+
