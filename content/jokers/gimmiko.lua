@@ -7,6 +7,9 @@ SMODS.Joker {
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,
+    pools = {
+        ["flynnset_gimmiko"] = true
+    },
 	config = { extra = { base_dollars = 2, dollars = 2, odds = 2 } },
 	loc_vars = function(self, info_queue, card)
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'merci')
@@ -43,6 +46,9 @@ SMODS.Joker {
 	eternal_compat = true,
 	perishable_compat = true,
     jand_gemini_compat = false,
+    pools = {
+        ["flynnset_gimmiko"] = true
+    },
 	config = { extra = {  } },
 	loc_vars = function(self, info_queue, card)
         return { vars = {  } } 
@@ -73,6 +79,9 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = true,
+    pools = {
+        ["flynnset_gimmiko"] = true
+    },
 	config = { card_limit = -1, extra = { xmult = 2 } },
 	loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.xmult } } 
@@ -96,6 +105,9 @@ SMODS.Joker {
 	eternal_compat = false,
 	perishable_compat = true,
     jand_gemini_compat = false,
+    pools = {
+        ["flynnset_gimmiko"] = true
+    },
 	config = { },
 	loc_vars = function(self, info_queue, card)
         return { vars = { } } 
