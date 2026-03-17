@@ -254,7 +254,7 @@ G.FUNCS.buy_lv_butt = function(e)
         {
             card_limit = e.config.ref_value.lv, 
             type = 'joker', 
-            highlight_limit = 0, 
+            highlight_limit = 1, 
         }
 	)
 	G.lv_choice = {}
@@ -406,6 +406,7 @@ function G.FUNCS.sacributt(e)
 		e.config.ref_table.debuff = true
 	end
 	G.lv_payment:emplace(card)
+	card.states.click.can = false
 	card.T.w = e.config.ref_table.T.w
 	card.T.h = e.config.ref_table.T.h
 end
@@ -443,6 +444,7 @@ function restock_extra_shop(key)
 		v:remove()
 	end
 	local shopkeep = SMODS.create_card({set = "jand_sk", area = G.jand_shopkeep, key = key or nil, key_append = "jand_sk", no_edition = true})
+	shopkeep.states.click.can = false
 	for k, v in pairs(G.jand_shop.cards) do
 		G.E_MANAGER:add_event(Event({
     	func = function() 
