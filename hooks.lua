@@ -112,7 +112,6 @@ function Game:start_run(args)
     G.GAME.stocked = true
 end
 
-
 local use_hook = G.FUNCS.use_card
 function G.FUNCS.use_card(e, mute, nosave)
     use_hook(e, mute, nosave)
@@ -128,3 +127,24 @@ function G.FUNCS.use_card(e, mute, nosave)
         }))
     end
 end
+
+local menu_hook = Game.main_menu
+function Game:main_menu(change_context)
+    JAND.merge_pools("Food", {"flynnset_food"}, true)
+    for k, v in pairs(G.P_CENTER_POOLS["Food"]) do
+        local badge_hook = v.set_badges
+        if badge_hook then
+            function v:set_badges(self, card, badges)
+                badge_hook(self, card, badges)
+                badges[#badges + 1] = create_badge("Food", G.C.GOLD, G.C.WHITE, 1.2)
+            end
+        else
+            v.set_badges = function(self, card, badges)
+                badges[#badges + 1] = create_badge("Food", G.C.GOLD, G.C.WHITE, 1.2)
+            end
+        end
+    end
+    return menu_hook(self, change_context)
+end
+
+
