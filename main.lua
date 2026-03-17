@@ -90,7 +90,6 @@ JAND.calculate = function(self, context)
 	end
 end
 
-
 JAND.custom_card_areas = function(G)
 	G.danbo = CardArea(
 		0, 0, 0, 0,
@@ -172,7 +171,7 @@ if not SMODS.ObjectTypes['Food'] then
         	j_ramen = true,
         	j_selzer = true,
     },
-})
+	})
 end
 
 SMODS.ObjectType({
@@ -180,6 +179,25 @@ SMODS.ObjectType({
     cards = {
     },
 })
+
+function JAND.merge_pools(pool1, merge_pools, both_sides) 
+	for k, v in pairs(merge_pools) do
+		if G.P_CENTER_POOLS[v] then
+			for k, center in pairs(G.P_CENTER_POOLS[v]) do
+				if not table.contains(G.P_CENTER_POOLS[pool1], center) then
+					G.P_CENTER_POOLS[pool1][#G.P_CENTER_POOLS[pool1]+1] = center
+				end
+			end
+			if both_sides then
+				for k, center in pairs(G.P_CENTER_POOLS[pool1]) do
+					if not table.contains(G.P_CENTER_POOLS[v], center) then
+						G.P_CENTER_POOLS[v][#G.P_CENTER_POOLS[v]+1] = center
+					end
+				end
+			end
+		end
+	end
+end
 
 SMODS.load_file("hooks.lua")()
 SMODS.load_file("extra_shop.lua")()
