@@ -1,3 +1,16 @@
+if G.low_buttons then
+	G.low_buttons[#G.low_buttons+1] = {n=G.UIT.R, config={align = "cm", minw = 2.8, minh = 1, r=0.15,colour = G.C.BLUE, button = 'extra_shop_swap', hover = true,shadow = true}, nodes = {
+		{n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
+			{n=G.UIT.T, config={text = G.shopname or "fuck up", scale = 1, func = "shopname_upd", colour = G.C.WHITE, shadow = true}},
+		}}               
+	}}
+end
+
+function G.FUNCS.shopname_upd(e)
+	if e.config.text ~= G.shopname then
+		e.config.text = G.shopname
+	end
+end
 
 function G.FUNCS.your_collection_shopkeepers()
 	G.SETTINGS.paused = true
@@ -457,7 +470,7 @@ function restock_extra_shop(key)
 	shopkeep.config.center:restock()
 	shopkeep.config.center:apply()
 	G.jand_shop.config.card_limit = shopkeep.ability.card_amount + 1 --it looks better this way TRUST
-	G.GAME.shopname = shopkeep.ability.shopname
+	G.shopname = shopkeep.ability.shopname
 	JAND.update_quipbox()
 end
 
