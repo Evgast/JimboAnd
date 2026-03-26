@@ -33,22 +33,6 @@ JAND.set_debuff = function(card)
 end
 
 JAND.calculate = function(self, context)
-	if context.starting_shop and not G.PROFILES[G.SETTINGS.profile].shopkey_tut then
-		G.PROFILES[G.SETTINGS.profile].shopkey_tut = true
-		local loc = {}
-		local quip = {}
-		localize{type = "descriptions", key = "extra_shop_keyb", set = "Tutor", default_col = G.C.UI.TEXT_LIGHT, nodes = loc, vars = {}, scale = 1.5}
-		quip = {transparent_multiline_text(loc)}
-		G.FUNCS.overlay_menu({
-			definition = create_UIBox_generic_options({
-			contents = {
-				{n=G.UIT.R, config={align = "cm"}, nodes=
-					quip
-				}
-			}
-			})
-		})
-	end
 	if context.ante_change and context.ante_end then
 		restock_extra_shop()
 	end
