@@ -182,13 +182,13 @@ return {
                 --We're adding fucking moon knight apparently
                 j_jand_revo = {
                     name = {"Moon Knight",
-                            "{s:0.6,C:inactive}Dracula owes him money{}"
+                            "{C:inactive,s:0.6}Dracula owes him money{}"
                     },
                     text = {
                         "Ready to trade his",
                         "{C:purple}Random Bullshit{} for",
                         "your {C:purple}Random Bullshit{}",
-                        "{S:0.6, C:inactive}(Printers for Jokers)"
+                        "{C:inactive,s:0.6}(Printers for Jokers)"
                     }
                 },
             },
