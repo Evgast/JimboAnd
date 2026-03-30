@@ -1,3 +1,5 @@
+if next(SMODS.find_mod("RevosVault")) then
+    
 new_shopkeep{
     key = "revo",
     atlas = "keepers",
@@ -87,4 +89,6 @@ function G.FUNCS.rbs_confirm(e)
     card.printer:add_to_deck()
     G.jokers:emplace(card.printer)
     G.FUNCS.exit_overlay_menu()
+end
+
 end
