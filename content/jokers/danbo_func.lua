@@ -53,15 +53,24 @@ SMODS.DrawStep {
 	key = 'nikola_shop_ui',
 	order = -30,
 	func = function(self)
-        local t2 = {
-            n=G.UIT.ROOT, config = {ref_table = card, minw = 1.1, maxw = 1.3, padding = 0.1, align = 'bm', colour = G.C.SECONDARY_SET.Planet, shadow = true, r = 0.08, minh = 0.94, hover = true}, nodes={
-                {n=G.UIT.T, config={text = localize('b_buy'),colour = G.C.WHITE, scale = 0.5}}
-            }}
 		if self.children.lv_price then
             self.children.lv_price:draw() 
         end
         if self.children.buy_lv then
             self.children.buy_lv:draw()
+        end
+	end,
+}
+
+SMODS.DrawStep {
+	key = 'revo_shop_ui',
+	order = -30,
+	func = function(self)
+		if self.children.rbs_price then
+            self.children.rbs_price:draw() 
+        end
+        if self.children.rbs_buy then
+            self.children.rbs_buy:draw()
         end
 	end,
 }

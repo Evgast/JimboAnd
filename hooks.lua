@@ -12,6 +12,12 @@ function Card:highlight(is_highlighted)
 	            {n = G.UIT.C, config = { minw = 1, minh = 1, colour = G.C.CLEAR, r = 0.1, padding = 0.15,  }, nodes = {
                     UIBox_button{ label = {"SACRIFICE"}, scale = 0.6, minw = 1.5, minh = 1, colour = G.C.BLACK, r = 0.1, button = nil, ref_table = self, func = "sacrifunc", shadow = true},
             }}}}
+    local rbs_buy = { n=G.UIT.ROOT, config = {ref_table = card, minw = 1.1, maxw = 1.3, padding = 0.1, align = 'bm', colour = G.C.PURPLE, shadow = true, r = 0.08, minh = 0.94, hover = true, ref_value = self, func = "can_buy_rbs", button = "buy_rbs_butt"}, nodes={
+                {n=G.UIT.T, config={text = "TRADE",colour = G.C.WHITE, scale = 0.5}}
+            }}
+    local rbs_confirm = { n=G.UIT.ROOT, config = {ref_table = card, minw = 1.1, maxw = 1.3, padding = 0.1, align = 'bm', colour = G.C.PURPLE, shadow = true, r = 0.08, minh = 0.94, hover = true, ref_value = self, funcs = "can_confirm_rbs", button = "rbs_confirm"}, nodes={
+                {n=G.UIT.T, config={text = "TRADE",colour = G.C.WHITE, scale = 0.5}}
+            }}
     --danbo
     if self.highlighted and self.config.center.key == "j_jand_danbo" and not self.ability.extra.to_copy then
         self.children.danbo_button = UIBox({    
@@ -61,6 +67,35 @@ function Card:highlight(is_highlighted)
     if self.highlighted and self.area.config.jand_no_use and self.children.use_button then
         self.children.use_button:remove()
         self.children.use_button = nil
+    end
+    --Revo buy 
+    if self.highlighted and self.children.rbs_price and not self.children.rbs_buy then
+        self.children.rbs_buy = UIBox{
+            definition = rbs_buy,
+            config = {
+                align="bm",
+                offset = {x=0,y=-0.35},
+                major = self,
+                bond = 'Weak',
+                parent = self
+                }
+            }
+    elseif self.children.rbs_buy and not self.highlighted then
+        self.children.rbs_buy:remove()
+        self.children.rbs_buy = nil
+    end
+    --Revo trade
+    if self.highlighted and self.printer then
+        self.children.use_button = UIBox{
+            definition = rbs_confirm,
+            config = {
+                align="bm",
+                offset = {x=0,y=-0.35},
+                major = self,
+                bond = 'Weak',
+                parent = self
+            }
+        }
     end
 end
 
@@ -131,19 +166,6 @@ end
 local menu_hook = Game.main_menu
 function Game:main_menu(change_context)
     JAND.merge_pools("Food", {"flynnset_food"}, true)
-    for k, v in pairs(G.P_CENTER_POOLS["Food"]) do
-        local badge_hook = v.set_badges
-        if badge_hook then
-            function v:set_badges(self, card, badges)
-                badge_hook(self, card, badges)
-                badges[#badges + 1] = create_badge("Food", G.C.GOLD, G.C.WHITE, 1.2)
-            end
-        else
-            v.set_badges = function(self, card, badges)
-                badges[#badges + 1] = create_badge("Food", G.C.GOLD, G.C.WHITE, 1.2)
-            end
-        end
-    end
     return menu_hook(self, change_context)
 end
 

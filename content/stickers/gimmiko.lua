@@ -148,20 +148,32 @@ SMODS.Sticker {
     rate = 0,
 }
 
-function JAND.sprue_apply_stickers(card) --yes I'm fucking hardcoding this shit fuck off
+function JAND.sprue_apply_stickers(card) --yes I'm fucking hardcoding this shit fuck off || EDIT: Looking back at it, yeah this is absolute bullshit. I'll probably won't add more stickers for sprue but just in case I'll add some comments now
     local gimmiko_upper = {}
     local gimmiko_lower = {}
     for k, v in pairs(SMODS.Stickers) do
         if card.config.center[v.key.."_compat"] ~= false then
             if not (v.compat_exceptions and v.compat_exceptions[card.config.center.key]) then
                 if v.gimmiko_upper then
-                    if v.key == "jand_gemini" and card.config.center.perishable_compat ~= false then
-                        for k, food in pairs(G.P_CENTER_POOLS["Food"]) do
-                            if food.key ~= card.config.center.key then
+                    if v.key == "jand_gemini" and card.config.center.perishable_compat ~= false then --due to ridiculous ass rules I came up for the gemini sticker, it needs a bunch of checks. Perishables don't apply to scaling jokers, that's why I'm checking for perishable compat
+                        if (card.config.center.pools and not card.config.center.pools["Food"]) or not card.config.center.pools then --Checking if the card is a food Joker... I just edited it, before I was using a fucking FOR LOOP HERE????
+                            if (card.config.center.mod and card.ability.extra) and card.config.center.jand_gemini_compat == nil then --Checks if the card is modded and doesn't have a jand_gemini_compat
+                                if type(card.ability.extra) == "number" then --This segment is a half-ass solution for checking if a modded Joker has a number values... Most modded jokers put their shit into extra... And all Jokers technically have number values, so I can't loop through card.ability
+                                    gimmiko_upper[#gimmiko_upper+1] = v.key
+                                elseif type(card.ability.extra) == "table" then
+                                    for k, extra_value in pairs(card.ability.extra) do
+                                        if type(extra_value) == "number" then
+                                            if not gimmiko_upper[v.key] then
+                                                gimmiko_upper[#gimmiko_upper+1] = v.key
+                                            end
+                                        end
+                                    end
+                                end
+                            else --If a Joker doesn't have to be checked for number values. Yay!!!!
                                 gimmiko_upper[#gimmiko_upper+1] = v.key
                             end
                         end
-                    elseif v.key ~= "jand_gemini" then
+                    elseif v.key ~= "jand_gemini" then --If the gimmiko sticker in question isn't the gemini sticker, just shove it into this stupid table already
                         gimmiko_upper[#gimmiko_upper+1] = v.key
                     end
                 end
@@ -178,3 +190,4 @@ function JAND.sprue_apply_stickers(card) --yes I'm fucking hardcoding this shit 
         card:add_sticker(pseudorandom_element(gimmiko_lower, "sprue_sticks"), true)
     end
 end
+--This is stupid but like it works I think so why would I want to change that

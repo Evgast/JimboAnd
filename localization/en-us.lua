@@ -140,6 +140,7 @@ return {
                     },
                 },
                 --SHOPKEEPERS HERE
+                --GIMMIKO
                 j_jand_nikola = {
                     name = "Nikola",
                     text = {
@@ -175,6 +176,19 @@ return {
                     text = {
                         "Sells {C:attention}3{} Jokers...",
                         "At a different price?"
+                    }
+                },
+                --REVO'S VAULT CROSSY MOD
+                --We're adding fucking moon knight apparently
+                j_jand_revo = {
+                    name = {"Moon Knight",
+                            "{s:0.6,C:inactive}Dracula owes him money{}"
+                    },
+                    text = {
+                        "Ready to trade his",
+                        "{C:purple}Random Bullshit{} for",
+                        "your {C:purple}Random Bullshit{}",
+                        "{S:0.6, C:inactive}(Printers for Jokers)"
                     }
                 },
             },
@@ -345,7 +359,40 @@ return {
                         "big hooooole of {C:diamonds}shit{}!",
                         "PUSSY!!!!!"
                     }
-                }
+                },
+                j_jand_revo_1 = {
+                    name = "",
+                    text = {
+                        "RANDOM",
+                        "{C:attention}BULLSHIT",
+                        "GO!!!!"
+                    }
+                },
+                j_jand_revo_2 = {
+                    name = "",
+                    text = {
+                        "What the...",
+                        "Fish."
+                    }
+                },
+                j_jand_revo_3 = {
+                    name = "",
+                    text = {
+                        "I don't know what I'm doing."
+                    }
+                },
+                j_jand_revo_4 = {
+                    name = "",
+                    text = {
+                        "Let me know if you see {C:mult}Dracula{}"
+                    }
+                },
+                j_jand_revo_5 = {
+                    name = "",
+                    text = {
+                        "Hello"
+                    }
+                },
             },
             Tutor = {
                 extra_shop_keyb = {
