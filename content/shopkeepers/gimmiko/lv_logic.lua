@@ -86,7 +86,14 @@ G.FUNCS.buy_lv_butt = function(e)
 				area_row = area_row + 1
 			end
 			local key = space_racism[i].key
+			local used
+			if G.GAME.used_jokers[key] then
+				used = true
+			end
 			local card = SMODS.create_card({area = G.lv_choice[area_row], key = key, bypass_discovery_center = true})
+			if not used then
+				G.GAME.used_jokers[key] = nil
+			end
 			if card.ability.hand_type then
 				G.lv_choice[area_row]:emplace(card)
 				do_that(card)
@@ -138,7 +145,14 @@ G.FUNCS.sacrifice_pages = function(args)
 				area_row = area_row + 1
 			end
 			local key = space_racism[i].key
+			local used
+			if G.GAME.used_jokers[key] then
+				used = true
+			end
 			local card = SMODS.create_card({area = G.lv_choice[area_row], key = key, bypass_discovery_center = true})
+			if not used then
+				G.GAME.used_jokers[key] = nil
+			end
 			if card.ability.hand_type then
 				G.lv_choice[area_row]:emplace(card)
 				do_that(card)
