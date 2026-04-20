@@ -209,6 +209,8 @@ SMODS.load_file("content/shopkeepers/gimmiko/sk_cards.lua")()
 SMODS.load_file("content/shopkeepers/gimmiko/lv_logic.lua")()
 --revo's vault crossing
 SMODS.load_file("content/shopkeepers/revo.lua")()
+--Then that cat gets all fat
+
 
 function table.contains(table, element) --why did I have that again? Sure I'll probably use it one day but I still didn't do so
     if table and type(table) == "table" then

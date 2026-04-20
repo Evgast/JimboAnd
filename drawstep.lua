@@ -1,21 +1,21 @@
 SMODS.DrawStep {
-	key = 'danbo_use',
+	key = 'jand_danbo_use',
 	order = -30,
 	func = function(self)
-		if self.children.danbo_button then
+		if self.children.joker_button then
             if self.highlighted then
-                self.children.danbo_button:draw() 
+                self.children.joker_button:draw() 
             else
-                self.children.danbo_button:remove() 
-                self.children.danbo_button = nil
+                self.children.joker_button:remove() 
+                self.children.joker_button = nil
             end
         end
-        if self.children.danbo_button then
+        if self.children.joker_button then
             if self.highlighted then
-                self.children.danbo_button:draw() 
+                self.children.joker_button:draw() 
             else
-                self.children.danbo_button:remove() 
-                self.children.danbo_button = nil
+                self.children.joker_button:remove() 
+                self.children.joker_button = nil
             end
         end
 	end,

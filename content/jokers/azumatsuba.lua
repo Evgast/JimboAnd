@@ -196,6 +196,7 @@ SMODS.Joker {
 	atlas = 'jimband',
 	pos = { x = 5, y = 0 },
 	cost = 7,
+    jand_usable = true,
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,

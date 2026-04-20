@@ -1,9 +1,9 @@
 local highlight_hooky = Card.highlight
 function Card:highlight(is_highlighted)
     highlight_hooky(self, is_highlighted)
-    local danbo_use = {n = G.UIT.ROOT, config = { minw = 1, minh = 1, align = "tm", colour = G.C.CLEAR}, nodes = {
+    local joker_use = {n = G.UIT.ROOT, config = { minw = 1, minh = 1, align = "tm", colour = G.C.CLEAR}, nodes = {
 	            {n = G.UIT.C, config = { minw = 1, minh = 1, colour = G.C.CLEAR, r = 0.1, padding = 0.15, func = "jand_recalc" }, nodes = {
-                    UIBox_button{ label = {localize("b_use")}, scale = 0.6, minw = 1.5, minh = 1, colour = G.C.BLACK, r = 0.1, button = nil, ref_table = self, func = "danboskill", shadow = true},
+                    UIBox_button{ label = {localize("b_use")}, scale = 0.6, minw = 1.5, minh = 1, colour = G.C.BLACK, r = 0.1, button = nil, ref_table = self, func = "jand_joker_use", shadow = true},
             }}}}
     local lv_buy = { n=G.UIT.ROOT, config = {ref_table = card, minw = 1.1, maxw = 1.3, padding = 0.1, align = 'bm', colour = G.C.SECONDARY_SET.Planet, shadow = true, r = 0.08, minh = 0.94, hover = true, ref_value = self, func = "can_buy_lv", button = "buy_lv_butt"}, nodes={
                 {n=G.UIT.T, config={text = localize('b_buy'),colour = G.C.WHITE, scale = 0.5}}
@@ -19,17 +19,17 @@ function Card:highlight(is_highlighted)
                 {n=G.UIT.T, config={text = "TRADE",colour = G.C.WHITE, scale = 0.5}}
             }}
     --danbo
-    if self.highlighted and self.config.center.key == "j_jand_danbo" and self.area.config.type == "joker" and not self.ability.extra.copying then
-        self.children.danbo_button = UIBox({    
-            definition = danbo_use,
+    if self.highlighted and self.config.center.jand_usable and self.area.config.type == "joker" and not self.ability.extra.copying then
+        self.children.joker_button = UIBox({    
+            definition = joker_use,
             config = {
             parent = self,
             align = 'tm',
             offset = { x = 0, y = 3.55 },
             colour = G.C.CLEAR}})
-    elseif self.children.danbo_button and not self.highlighted and self.config.center.key == "j_jand_danbo" then
-        self.children.danbo_button:remove()
-        self.children.danbo_button = nil
+    elseif self.children.joker_button and self.config.center.jand_usable and not self.highlighted then
+        self.children.joker_button:remove()
+        self.children.joker_button = nil
     end
     --hand level shop buy
     if self.highlighted and self.children.lv_price and not self.children.buy_lv then
@@ -144,6 +144,7 @@ function Game:start_run(args)
     extra_shop_create()
     if not G.GAME.stocked then
         restock_extra_shop()
+        JAND.remove_from_used("Vanilla")
     end
     for k, v in pairs(G.jand_shopkeep.cards) do
 		v.config.center:apply()
