@@ -7,6 +7,7 @@ SMODS.Joker {
 	blueprint_compat = false,
 	eternal_compat = true,
 	perishable_compat = true,
+    attributes = { "chance", "economy" },
     pools = {
         ["flynnset_gimmiko"] = true
     },
@@ -79,6 +80,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = true,
+    attributes = { "xmult", "joker_slot" },
     pools = {
         ["flynnset_gimmiko"] = true
     },
@@ -105,6 +107,7 @@ SMODS.Joker {
 	eternal_compat = false,
 	perishable_compat = true,
     jand_gemini_compat = false,
+    attributes = { "editions" },
     pools = {
         ["flynnset_gimmiko"] = true
     },

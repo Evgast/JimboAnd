@@ -8,6 +8,7 @@ SMODS.Joker {
 	eternal_compat = true,
 	perishable_compat = true,
     jand_gemini_compat = false,
+    attributes = { "mod_chance", "four", "rank" },
 	config = { extra = { numerator = 0, numerator_gain = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.numerator_gain } }
@@ -93,6 +94,7 @@ SMODS.Joker {
 	eternal_compat = true,
 	perishable_compat = false,
     jand_slippery_compat = false,
+    attributes = { "scaling", "mult" },
 	config = { immovable = true, extra = { mult = 0, mult_gain = 2, tomo_slot = 1 } },
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain} }
@@ -161,6 +163,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = false,
+    attributes = { "scaling", "xmult", "chance", "hearts", "destroy_card" },
 	config = { extra = { xmult = 1, xmult_gain = 0.25, odds = 4, suit = "Hearts" } },
 	loc_vars = function(self, info_queue, card)
         local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'chichi')
@@ -197,7 +200,8 @@ SMODS.Joker {
 	eternal_compat = true,
 	perishable_compat = true,
     jand_gemini_compat = false,
-	config = { extra = { to_copy = nil, } },
+    attributes = { "copying" },
+	config = { extra = { copying = nil, } },
 	loc_vars = function(self, info_queue, card)
         if card.area and card.area == G.jokers then
             local other_joker
@@ -220,16 +224,24 @@ SMODS.Joker {
                     }
                 }
             }
-            if not card.ability.extra.to_copy then
-		        return { main_end = main_end }
+            if card.ability.extra.copying then
+                for k, v in pairs(G.jand_util_area.cards) do
+                    if v.ability.danbo_id == card.sort_id then
+                        return { key = "j_jand_danbo_used", vars = { localize{set = "Joker", key = v.config.center.key, type = "name_text" } } }
+                    end
+                end   
             else
-                return { key = "j_jand_danbo_used", vars = { localize{set = "Joker", key = G.danbo.cards[card.ability.extra.to_copy].config.center.key, type = "name_text" } } }   
+                return { main_end = main_end }
             end
         end
 	end,
 	calculate = function(self, card, context)
-        if card.ability.extra.to_copy then
-            return SMODS.blueprint_effect(card, G.danbo.cards[card.ability.extra.to_copy], context)
+        if card.ability.extra.copying then
+            for k, v in pairs(G.jand_util_area.cards) do
+                if v.ability.danbo_id == card.sort_id then
+                    return SMODS.blueprint_effect(card, v, context)
+                end
+            end
         end
     end,
     use = function (self, card)
@@ -240,9 +252,9 @@ SMODS.Joker {
         local copy = copy_card(other_joker)
         copy.states.visible = true
         copy.states.visible = false
-        G.danbo:emplace(copy)
-        card.ability.extra.to_copy = #G.danbo.cards
-        copy.danbo = card.ability.extra.to_copy
+        G.jand_util_area:emplace(copy)
+        copy.ability.danbo_id = card.sort_id
+        card.ability.extra.copying = true
     end,
     can_use = function (self, card)
         local other_joker
@@ -250,7 +262,7 @@ SMODS.Joker {
             if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i + 1] end
         end
         local compatible = other_joker and other_joker ~= card and other_joker.config.center.blueprint_compat
-        if compatible then
+        if compatible and not card.ability.extra.copying then
             return true
         end
     end,
@@ -265,6 +277,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = true,
 	perishable_compat = false,
+    attributes = { "scaling", "chips", "destroy_card", "rank" },
 	config = { extra = { chips = 0, chips_gain = 0, highest_rank = 0, ready = false } },
 	loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.chips, localize("Straight", 'poker_hands') } } 
@@ -317,6 +330,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = false,
 	perishable_compat = true,
+    attributes = { "chips", "scaling" },
     pools = {
         ["Food"] = true
     },
@@ -365,6 +379,7 @@ SMODS.Joker {
 	eternal_compat = true,
 	perishable_compat = false,
 	config = { extra = { mult = 0, mult_gain = 8, to_play = 3, remaining = 3, why = nil, lhp = "None" } },
+    attributes = { "mult", "scaling", "hand_type" },
 	loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.mult, card.ability.extra.mult_gain, card.ability.extra.to_play, card.ability.extra.remaining, card.ability.extra.lhp } } 
 	end,
@@ -424,6 +439,7 @@ SMODS.Joker {
 	blueprint_compat = true,
 	eternal_compat = false,
 	perishable_compat = true,
+    attributes = { "chips", "chance", "scaling" },
     pools = {
         ["Food"] = true
     },

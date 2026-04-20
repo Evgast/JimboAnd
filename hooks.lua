@@ -19,7 +19,7 @@ function Card:highlight(is_highlighted)
                 {n=G.UIT.T, config={text = "TRADE",colour = G.C.WHITE, scale = 0.5}}
             }}
     --danbo
-    if self.highlighted and self.config.center.key == "j_jand_danbo" and not self.ability.extra.to_copy then
+    if self.highlighted and self.config.center.key == "j_jand_danbo" and self.area.config.type == "joker" and not self.ability.extra.copying then
         self.children.danbo_button = UIBox({    
             definition = danbo_use,
             config = {
@@ -123,13 +123,17 @@ end
 
 local scale_hook = SMODS.scale_card
 function SMODS.scale_card(card, args)
-	if #SMODS.find_card("j_jand_yomi") ~= 0 then
-		for k, v in pairs(G.P_CENTER_POOLS["Food"]) do
-			if v.key == card.config.center.key then
-				SMODS.calculate_effect({message = localize("k_nope_ex"), colour = G.C.PURPLE, delay = 0.2}, card)
-				return
-			end
-		end
+	if next(SMODS.find_card("j_jand_yomi")) then
+        local yomi_owned = false
+        for k, v in pairs(SMODS.find_card("j_jand_yomi")) do
+            if v.area.config.type == "joker" then
+                yomi_owned = true
+            end
+        end
+        if card:has_attribute("food") and yomi_owned then
+		    SMODS.calculate_effect({message = localize("k_nope_ex"), colour = G.C.PURPLE, delay = 0.2}, card)
+            return nil
+        end
 	end
 	scale_hook(card, args)
 end
@@ -166,6 +170,7 @@ end
 local menu_hook = Game.main_menu
 function Game:main_menu(change_context)
     JAND.merge_pools("Food", {"flynnset_food"}, true)
+    JAND.pool_to_attribute("Food", "food")
     return menu_hook(self, change_context)
 end
 

@@ -75,7 +75,7 @@ JAND.calculate = function(self, context)
 end
 
 JAND.custom_card_areas = function(G)
-	G.danbo = CardArea(
+	G.jand_util_area = CardArea(
 		0, 0, 0, 0,
         {
             card_limit = 1, 
@@ -140,12 +140,13 @@ SMODS.Atlas {
 	py = 34
 }
 
+SMODS.Attributes["food"].attribute_badge = function ()
+	return create_badge("Food", G.C.GOLD, G.C.WHITE)
+end
+
 if not SMODS.ObjectTypes['Food'] then
 	SMODS.ObjectType({
     	key = "Food",
-		pool_badge = function ()
-			return create_badge("Food", G.C.GOLD, G.C.WHITE)
-		end,
     	default = "j_ice_cream",
     	cards = {
         	j_gros_michel = true,
@@ -186,8 +187,17 @@ function JAND.merge_pools(pool1, merge_pools, both_sides)
 	end
 end
 
+function JAND.pool_to_attribute(pool, attribute) 
+	for k, v in pairs(G.P_CENTER_POOLS[pool]) do
+		if not table.contains(SMODS.Attributes[attribute].keys, v.key) then
+			SMODS.add_attribute(attribute, {v.key})
+		end
+	end
+end
+
 SMODS.load_file("hooks.lua")()
 SMODS.load_file("extra_shop.lua")()
+SMODS.load_file("drawstep.lua")()
 
 --I'll probably add a feature for disabling packs one day
 SMODS.load_file("content/jokers/azumatsuba.lua")()
