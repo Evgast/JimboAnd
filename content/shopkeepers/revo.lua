@@ -4,9 +4,10 @@ new_shopkeep{
     key = "revo",
     atlas = "keepers",
     pos = { x = 0, y = 1},
-    card_amount = 2,
+    config = {card_amount = 2,
     quips = 5,
     shopname = "Revo's Vault",
+    },
     restock = function ()
         for i = 1, 2 do
             local card = SMODS.create_card({set = "Joker", rarity = "crv_p", area = G.jand_shop, bypass_discovery_center = true})

@@ -1,7 +1,16 @@
 JAND = SMODS.current_mod
+
 JAND.optional_features = {
     retrigger_joker = true,
 }
+
+function JAND.reset_game_globals(run_start)
+	if run_start then
+		if G.beta_key then
+        	SMODS.add_card({ set = "Joker", area = G.jokers, key = G.beta_key, key_append = "jand_beta", no_edition = true })
+    	end
+	end
+end
 
 JAND.ui_config = {
 	colour = darken(G.C.GREEN, 0.6),
@@ -21,6 +30,17 @@ JAND.custom_ui = function(nodes)
     return nodes
 end
 
+JAND.extra_tabs = function()
+	return {
+		{
+			label = 'Packs!',
+			tab_definition_function = function()
+				return G.JAND_PACKCOL()
+			end,
+		},
+	}
+end
+
 JAND.custom_collection_tabs = function()
 	local t = UIBox_button({button = 'your_collection_shopkeepers', label = {"Shopkeepers"}, minw = 5})
 	return { t }
@@ -35,6 +55,14 @@ end
 JAND.calculate = function(self, context)
 	if context.ante_change and context.ante_end then
 		restock_extra_shop()
+		G.GAME.blinds_skipped = 0
+	end
+	if context.skip_blind then
+		if not G.GAME.blinds_skipped then
+			G.GAME.blinds_skipped = 1
+		else
+			G.GAME.blinds_skipped = G.GAME.blinds_skipped + 1
+		end
 	end
 	if context.jimband_joker_align then
 		for k, card in pairs(G.jokers.cards) do
@@ -127,6 +155,13 @@ SMODS.Atlas {
 }
 
 SMODS.Atlas {
+	key = "dialogue",
+	path = "dialogue_cards.png",
+	px = 71,
+	py = 95
+}
+
+SMODS.Atlas {
 	key = "jandgo",
 	path = "jandgo.png",
 	px = 338,
@@ -162,12 +197,6 @@ if not SMODS.ObjectTypes['Food'] then
 	})
 end
 
-SMODS.ObjectType({
-    key = "jand_sk",
-    cards = {
-    },
-})
-
 function JAND.merge_pools(pool1, merge_pools, both_sides) 
 	for k, v in pairs(merge_pools) do
 		if G.P_CENTER_POOLS[v] then
@@ -187,6 +216,22 @@ function JAND.merge_pools(pool1, merge_pools, both_sides)
 	end
 end
 
+function JAND.merge_tables(taker, source, both_sides)
+	for k, v in pairs(source) do
+		if not table.contains(taker, v) then
+			taker[#taker+1] = v
+		end
+	end
+	if both_sides then
+		for k, v in pairs(taker) do
+			if not table.contains(source, v) then
+				source[#source+1] = v
+			end
+		end
+	end
+end
+
+
 function JAND.pool_to_attribute(pool, attribute) 
 	for k, v in pairs(G.P_CENTER_POOLS[pool]) do
 		if not table.contains(SMODS.Attributes[attribute].keys, v.key) then
@@ -195,9 +240,22 @@ function JAND.pool_to_attribute(pool, attribute)
 	end
 end
 
+function table.contains(table, element)
+    if table and type(table) == "table" then
+        for _, value in pairs(table) do
+            if value == element then
+                return true
+            end
+        end
+        return false
+    end
+end
+
 SMODS.load_file("hooks.lua")()
 SMODS.load_file("extra_shop.lua")()
 SMODS.load_file("drawstep.lua")()
+SMODS.load_file("booster_util.lua")()
+SMODS.load_file("pack_col.lua")()
 
 --I'll probably add a feature for disabling packs one day
 SMODS.load_file("content/jokers/azumatsuba.lua")()
@@ -210,18 +268,9 @@ SMODS.load_file("content/shopkeepers/gimmiko/lv_logic.lua")()
 --revo's vault crossing
 SMODS.load_file("content/shopkeepers/revo.lua")()
 --Then that cat gets all fat
-
-
-function table.contains(table, element) --why did I have that again? Sure I'll probably use it one day but I still didn't do so
-    if table and type(table) == "table" then
-        for _, value in pairs(table) do
-            if value == element then
-                return true
-            end
-        end
-        return false
-    end
-end
+SMODS.load_file("content/jokers/mewgenics.lua")()
+SMODS.load_file("content/blinds/mewgenics.lua")()
+SMODS.load_file("mewgenics_lab.lua")()
 
 function JAND.table_remove(table, element)
 	for i = 1, #table do
@@ -320,4 +369,66 @@ function JAND.swap_cards(card, type, amount, jump)
 	return sw_slot
 end
 
+function JAND.convert(cards, source, enhancement, suit) --Mostly localthunk code
+	if source then
+		source:juice_up(0.3, 0.5)
+	end
+    for i=1, #cards do
+		local percent = 1.15 - (i-0.999)/(#cards-0.998)*0.3
+        G.E_MANAGER:add_event(Event({
+			trigger = 'after',
+			delay = 0.15,
+			func = function() 
+				cards[i]:flip()
+				play_sound('card1', percent)
+				cards[i]:juice_up(0.3, 0.3)
+				return true 
+			end
+		}))
+    end
+    for i=1, #cards do
+        G.E_MANAGER:add_event(Event({
+			trigger = 'after',
+			delay = 0.1,
+			func = function() 
+				if suit then
+					cards[i]:change_suit(suit)
+				end
+				if enhancement then
+					cards[i]:set_ability(enhancement)
+				end
+				return true 
+			end 
+		}))
+    end
+	for i=1, #cards do
+		local percent = 1.15 - (i-0.999)/(#cards-0.998)*0.3
+        G.E_MANAGER:add_event(Event({
+			trigger = 'after',
+			delay = 0.15,
+			func = function() 
+				cards[i]:flip()
+				play_sound('card1', percent, 0.6)
+				cards[i]:juice_up(0.3, 0.3)
+				return true 
+			end
+		}))
+    end
+end
+
+JAND.Packs = {}
+JAND.PackKeys = {} --for the sake of the collection thing. Being a dumbass prolly
+
+JAND.Pack = function(key, text, colour, text_colour)
+	JAND.PackKeys[#JAND.PackKeys+1] = key
+	JAND.Packs[key] = {
+		text = text, --lowkey don't see the point in localizing that
+		badge_colour = colour,
+		text_colour = text_colour or G.C.WHITE
+	}
+end
+
+JAND.Pack("azuma", "Azumatsuba", G.C.RED)
+JAND.Pack("giiko", "Jabberwock Night", lighten(G.C.RED, 0.5))
+JAND.Pack("mew", "Mewgenics", G.C.GREY)
 

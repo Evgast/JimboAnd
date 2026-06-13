@@ -1,0 +1,88 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''
+    G.GAME.round_resets.blind_choices.Boss = get_new_boss()
+'''
+position = "after"
+payload = '''
+    G.GAME.next_boss_dbug = nil
+    G.GAME.round_resets.blind_choices.Small = "bl_small"
+    G.GAME.round_resets.blind_choices.Big = "bl_big"
+    if G.P_BLINDS[G.GAME.round_resets.blind_choices.Boss].jand_blind_reset then
+        G.P_BLINDS[G.GAME.round_resets.blind_choices.Boss]:jand_blind_reset()
+    end
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+    if G.GAME.round_resets.blind == G.P_BLINDS.bl_small then
+'''
+position = "at"
+payload = '''
+    if G.GAME.round_resets.blind == G.P_BLINDS[G.GAME.round_resets.blind_choices.Small] then
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+    elseif G.GAME.round_resets.blind == G.P_BLINDS.bl_big then
+'''
+position = "at"
+payload = '''
+    elseif G.GAME.round_resets.blind == G.P_BLINDS[G.GAME.round_resets.blind_choices.Big] then
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+    if G.GAME.blind:get_type() == 'Boss' then
+'''
+position = "at"
+payload = '''
+    if G.GAME.blind.config.blind.key == G.GAME.round_resets.blind_choices.Boss then
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''
+    if not v.boss then
+'''
+position = "after"
+payload = '''
+    elseif G.GAME.prevent_showdown and not v.boss.showdown then
+        eligible_bosses[k] = res and true or nil
+    elseif G.GAME.prevent_showdown and v.boss.showdown then
+        eligible_bosses[k] = nil
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''
+    function get_new_boss()
+'''
+position = "after"
+payload = '''
+    if G.GAME.next_boss_dbug then
+        return G.GAME.next_boss_dbug
+    end
+    --When debug plus isn't an option :з
+'''
+match_indent = true

@@ -150,6 +150,7 @@ function Game:start_run(args)
 		v.config.center:apply()
 	end
     G.GAME.stocked = true
+    G.update_quipbox = true
 end
 
 local use_hook = G.FUNCS.use_card
@@ -170,9 +171,88 @@ end
 
 local menu_hook = Game.main_menu
 function Game:main_menu(change_context)
+    JAND.dialogues = {}
+    for k, v in pairs(JAND.fuck_dialogues) do
+        JAND.dialogues[k] = v
+    end
     JAND.merge_pools("Food", {"flynnset_food"}, true)
     JAND.pool_to_attribute("Food", "food")
+    JAND.auto_beta()
+    init_colsets()
     return menu_hook(self, change_context)
+end
+
+local click_hook = Card.click
+function Card:click()
+    click_hook(self)
+    if self.jand_click_func then
+        self:jand_click_func()
+    end
+end
+
+local remove_hook = Card.remove
+function Card:remove()
+    remove_hook(self)
+    if self.config.center.remove_general then
+        self.config.center:remove_general(self)
+    end
+end
+
+local h_hook = Card.generate_UIBox_ability_table
+function Card:generate_UIBox_ability_table()
+    if self.children.h_popup and self.config.center and self.config.center.key == "j_jand_arthur" then 
+        return
+    end
+    return h_hook(self)
+end
+
+local stop_h_hook = Node.stop_hover
+function Node:stop_hover()
+    if self.highlighted and self.config.center and self.config.center.key == "j_jand_arthur" then
+        return
+    end
+    stop_h_hook(self)
+end
+
+local mod_badge_hook = SMODS.create_mod_badges
+function SMODS.create_mod_badges(obj, badges)
+    if obj then
+        if obj.mod == JAND then
+            if obj.jand_pack then
+                local pack = JAND.Packs[obj.jand_pack]
+                local mod = obj.mod
+                local badge_text = DynaText({string = mod.display_name, colours = {pack.text_colour},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33})
+                local pack_text = DynaText({string = pack.text, colours = {pack.text_colour},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33})
+                local text_nodes =
+                    {
+                        { n = G.UIT.R, config = {minw =  0.6, align = "cm",}, nodes = {
+                            {n=G.UIT.B, config={h=0.1,w=0.1}},
+                                { n = G.UIT.O, config = {object = badge_text}},
+                            {n=G.UIT.B, config={h=0.1,w=0.1}}
+                        }},
+                        { n = G.UIT.R, config = {minw =  0.6, align = "cm",}, nodes = {
+                            {n=G.UIT.B, config={h=0.1,w=0.1}},
+                                { n = G.UIT.O, config = {object = pack_text}},
+                            {n=G.UIT.B, config={h=0.1,w=0.1}}
+                        }}
+                    }
+                badges[#badges + 1] = {n=G.UIT.R, config={align = "cm"}, nodes={
+                    {n=G.UIT.R, config={align = "cm", minw = 0.6, colour = pack.badge_colour, r = 1, emboss = 0.05, padding = 0.03}, nodes=text_nodes}
+                }}
+                return
+            end
+        end
+    end
+    return mod_badge_hook(obj, badges)
+end
+
+local skip_blind_hook = G.FUNCS.hover_tag_proxy
+G.FUNCS.hover_tag_proxy = function(e)
+    skip_blind_hook(e)
+    if (G.GAME.blinds_skipped and G.GAME.blinds_skipped > 0) and G.GAME.round_resets.blind_choices.Boss == "bl_jand_h_iii" then
+        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.button = nil
+    end
 end
 
 

@@ -17,7 +17,7 @@ payload = '''
     else
         jand_shop_butt = {n=G.UIT.R, config={align = "cm", maxw = 2.8, minh = 1, r=0.15,colour = G.C.BLUE, button = 'extra_shop_swap', hover = true,shadow = true}, nodes = {
             {n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
-                {n=G.UIT.T, config={text = G.shopname or "fuck up", scale = 1, func = "shopname_upd", colour = G.C.WHITE, shadow = true}},
+                {n=G.UIT.T, config={text = G.GAME.shopname or "fuck up", scale = 1, func = "shopname_upd", colour = G.C.WHITE, shadow = true}},
             }}               
         }}
     end

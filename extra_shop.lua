@@ -2,43 +2,42 @@ if G.low_buttons then
 	G.low_buttons[#G.low_buttons+1] = function()
 		return {n=G.UIT.R, config={align = "cm", minw = 2.8, minh = 1, r=0.15,colour = G.C.BLUE, button = 'extra_shop_swap', hover = true,shadow = true}, nodes = {
 			{n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
-				{n=G.UIT.T, config={text = G.shopname, func = "shopname_upd", scale = 1, colour = G.C.WHITE, shadow = true}},
+				{n=G.UIT.T, config={text = G.GAME.shopname, func = "shopname_upd", scale = 1, colour = G.C.WHITE, shadow = true}},
 			}}               
 		}}
 	end
 end
 
 function G.FUNCS.shopname_upd(e)
-	if e.config.text ~= G.shopname then
-		e.config.text = G.shopname
+	if e.config.text ~= G.GAME.shopname then
+		e.config.text = G.GAME.shopname
 	end
 end
 
-function new_shopkeep(t)
-    SMODS.Joker {
-        key = t.key,
-        atlas = t.atlas,
-        pos = t.pos,
-        config = { card_amount = t.card_amount, quips = t.quips, shopname = t.shopname },
-        no_collection = true,
-        discovered = true,
-        in_pool = function (self, args)
-            if args.source == "jand_sk" then
-                return true
-            else
-                return false
-            end
-        end,
-        pools = {
-            ["jand_sk"] = true
-        },
-        set_card_type_badge = function(self, card, badges)
-            badges[#badges + 1] = create_badge("Shopkeeper", G.C.PURPLE, G.C.WHITE, 1.2)
-        end,
-        restock = t.restock,
-        apply = t.apply,
-    }
-end
+SMODS.ObjectType{
+	key = "Shopkeeper",
+	default = "sk_jand_nikola"
+}
+
+JAND.Shopkeeper = SMODS.Center:extend {
+    unlocked = true,
+    discovered = true,
+    pos = { x = 0, y = 0 },
+    config = {},
+	no_collection = true,
+    set = 'Shopkeeper',
+    atlas = 'Joker',
+    class_prefix = 'sk',
+	set_card_type_badge = function(self, card, badges)
+        badges[#badges + 1] = create_badge("Shopkeeper", G.C.PURPLE, G.C.WHITE, 1.2)
+    end,
+    required_params = {
+        'key',
+    },
+    inject = function(self)
+        SMODS.Center.inject(self)
+    end
+}
 
 function JAND.price_tag(config)
 	return {n=G.UIT.ROOT, config = {minw = 0.6, align = 'tm', colour = darken(G.C.BLACK, 0.2), shadow = true, r = 0.05, padding = 0.05, minh = 1}, nodes={
@@ -57,13 +56,13 @@ function G.FUNCS.your_collection_shopkeepers()
       	{card_limit = 5, type = 'title', highlight_limit = 0}
 	)
 	for i=1, 5 do
-		local key = G.P_CENTER_POOLS["jand_sk"][i].key
-		local card = SMODS.create_card({set = "jand_sk", area = G.your_collection_sk, key = key, key_append = "jand_sk", no_edition = true})
+		local key = G.P_CENTER_POOLS['Shopkeeper'][i].key
+		local card = SMODS.create_card({set = "Shopkeeper", area = G.your_collection_sk, key = key, no_edition = true})
       	G.your_collection_sk:emplace(card)
 	end
 	local keepers_options = {}
-	for i=1, math.ceil(#G.P_CENTER_POOLS["jand_sk"]/5) do
-		table.insert(keepers_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#G.P_CENTER_POOLS["jand_sk"]/5)))
+	for i=1, math.ceil(#G.P_CENTER_POOLS['Shopkeeper']/5) do
+		table.insert(keepers_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#G.P_CENTER_POOLS['Shopkeeper']/5)))
 	end
   	G.FUNCS.overlay_menu{
     	definition = create_UIBox_generic_options({
@@ -88,9 +87,9 @@ G.FUNCS.sk_collection_slider = function(args)
 		c:remove()
 	end
 	for i=1, 5 do
-		if G.P_CENTER_POOLS["jand_sk"][((args.cycle_config.current_option-1)*5)+i] then
-			local key = G.P_CENTER_POOLS["jand_sk"][((args.cycle_config.current_option-1)*5)+i].key
-			local card = SMODS.create_card({set = "jand_sk", area = G.your_collection_sk, key = key, key_append = "jand_sk", no_edition = true})
+		if G.P_CENTER_POOLS['Shopkeeper'][((args.cycle_config.current_option-1)*5)+i] then
+			local key = G.P_CENTER_POOLS['Shopkeeper'][((args.cycle_config.current_option-1)*5)+i].key
+			local card = SMODS.create_card({set = "Shopkeeper", area = G.your_collection_sk, key = key, no_edition = true})
 			G.your_collection_sk:emplace(card)
 		end
 	end
@@ -257,7 +256,7 @@ function restock_extra_shop(key)
 	for k, v in pairs(G.jand_shopkeep.cards) do
 		v:remove()
 	end
-	local shopkeep = SMODS.create_card({set = "jand_sk", area = G.jand_shopkeep, key = key or nil, key_append = "jand_sk", no_edition = true})
+	local shopkeep = SMODS.create_card({set = "Shopkeeper", area = G.jand_shopkeep, key = key or nil, no_edition = true})
 	shopkeep.states.click.can = false
 	for k, v in pairs(G.jand_shop.cards) do
 		G.E_MANAGER:add_event(Event({
@@ -271,7 +270,7 @@ function restock_extra_shop(key)
 	shopkeep.config.center:restock()
 	shopkeep.config.center:apply()
 	G.jand_shop.config.card_limit = shopkeep.ability.card_amount + 1 --it looks better this way TRUST
-	G.shopname = shopkeep.ability.shopname
+	G.GAME.shopname = shopkeep.ability.shopname
 	JAND.update_quipbox()
 end
 

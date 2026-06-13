@@ -3,6 +3,7 @@ SMODS.Joker {
 	rarity = 2,
 	atlas = 'jimband',
 	pos = { x = 0, y = 0 },
+    jand_pack = "azuma",
 	cost = 5,
 	blueprint_compat = false,
 	eternal_compat = true,
@@ -42,6 +43,7 @@ SMODS.Joker {
 	rarity = 1,
 	atlas = 'jimband',
 	pos = { x = 1, y = 0 },
+    jand_pack = "azuma",
 	cost = 4,
 	blueprint_compat = true,
 	eternal_compat = true,
@@ -53,20 +55,8 @@ SMODS.Joker {
 	end,
 	calculate = function(self, card, context)
         if context.starting_shop then
-            local boost = SMODS.create_card{set = "Booster"}
-            local boost_to_create = {}
-            boost.states.visible = false
-            for k, v in pairs(G.P_CENTER_POOLS["Booster"]) do
-                if v.kind == boost.config.center.kind then
-                    local booster_key = v.key
-                    local find_jumbo = string.find(booster_key, "jumbo")
-                    if find_jumbo then
-                        boost_to_create[#boost_to_create+1] = v.key
-                    end
-                end
-            end
-            boost:remove()
-            SMODS.add_booster_to_shop(pseudorandom_element(boost_to_create, "boost"))
+            local boost = SMODS.create_card{set = "Booster", area = G.shop_booster, key_append = "only_jumbo"}
+            JAND.booster_emplace(boost)
         end
     end
 }
@@ -75,6 +65,7 @@ SMODS.Joker {
 	key = 'yomi',
 	rarity = 2,
 	atlas = 'jimband',
+    jand_pack = "azuma",
 	pos = { x = 2, y = 0 },
 	cost = 4,
 	blueprint_compat = false,
@@ -89,6 +80,7 @@ SMODS.Joker {
 	rarity = 2,
 	atlas = 'jimband',
 	pos = { x = 3, y = 0 },
+    jand_pack = "azuma",
 	cost = 4,
 	blueprint_compat = true,
 	eternal_compat = true,
@@ -159,6 +151,7 @@ SMODS.Joker {
 	rarity = 3,
 	atlas = 'jimband',
 	pos = { x = 4, y = 0 },
+    jand_pack = "azuma",
 	cost = 7,
 	blueprint_compat = true,
 	eternal_compat = true,
@@ -195,6 +188,7 @@ SMODS.Joker {
 	rarity = 3,
 	atlas = 'jimband',
 	pos = { x = 5, y = 0 },
+    jand_pack = "azuma",
 	cost = 7,
     jand_usable = true,
 	blueprint_compat = false,
@@ -274,6 +268,7 @@ SMODS.Joker {
 	rarity = 2,
 	atlas = 'jimband',
 	pos = { x = 6, y = 0 },
+    jand_pack = "azuma",
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = true,
@@ -327,6 +322,7 @@ SMODS.Joker {
 	rarity = 1,
 	atlas = 'jimband',
 	pos = { x = 7, y = 0 },
+    jand_pack = "azuma",
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = false,
@@ -375,6 +371,7 @@ SMODS.Joker {
 	rarity = 2,
 	atlas = 'jimband',
 	pos = { x = 8, y = 0 },
+    jand_pack = "azuma",
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = true,
@@ -436,6 +433,7 @@ SMODS.Joker {
 	rarity = 1,
 	atlas = 'jimband',
 	pos = { x = 9, y = 0 },
+    jand_pack = "azuma",
 	cost = 5,
 	blueprint_compat = true,
 	eternal_compat = false,
@@ -464,6 +462,7 @@ SMODS.Joker {
                 if not SMODS.pseudorandom_probability(card, 'andagi', 1, card.ability.extra.odds) and not (G.jokers.config.card_limit <= #G.jokers.cards) then
                     local again = copy_card(card)
                     G.jokers:emplace(again)
+                    again:add_to_deck()
                     SMODS.scale_card(again, {
                     ref_table = again.ability.extra,
                     ref_value = "odds",

@@ -1,12 +1,14 @@
 
 
-new_shopkeep{
+JAND.Shopkeeper{
     key = "nikola",
     atlas = "keepers",
     pos = { x = 0, y = 0},
-    card_amount = 2,
+    jand_pack = "giiko",
+    config = {card_amount = 2,
     quips = 5,
     shopname = "Tail's End",
+    },
     restock = function ()
         for i = 1, 2 do
             create_nikola_card("Joker", G.jand_shop, 1)
@@ -19,13 +21,15 @@ new_shopkeep{
     end
 }
 
-new_shopkeep{
+JAND.Shopkeeper{
     key = "crows",
     atlas = "keepers",
     pos = { x = 1, y = 0},
-    card_amount = 3,
+    jand_pack = "giiko",
+    config = {card_amount = 3,
     quips = 4,
     shopname = "Utility Poll",
+    },
     restock = function ()
         local pool = {}
             for k, v in pairs(G.P_CENTER_POOLS["Consumeables"]) do --There's probably a more reasonable way to get a list of all available consum(e)able types but I'm a dipshit :з 
@@ -55,13 +59,15 @@ new_shopkeep{
     end
 }
 
-new_shopkeep{
+JAND.Shopkeeper{
     key = "ika",
     atlas = "keepers",
     pos = { x = 2, y = 0},
-    card_amount = 2,
+    jand_pack = "giiko",
+    config = {card_amount = 2,
     quips = 4,
     shopname = "1-8-1",
+    },
     restock = function ()
         for i = 1, 2 do
             JAND.add_booster_to_area(nil, G.jand_shop)
@@ -80,13 +86,15 @@ new_shopkeep{
     end
 }
 
-new_shopkeep{
+JAND.Shopkeeper{
     key = "sprue",
     atlas = "keepers",
     pos = { x = 3, y = 0},
-    card_amount = 3,
+    jand_pack = "giiko",
+    config = {card_amount = 3,
     quips = 4,
     shopname = "Sterling's Customs",
+    },
     restock = function ()
         for i = 1, 3 do
             local card = SMODS.create_card({set = "Joker", area = G.jand_shop, bypass_discovery_center = true})
@@ -107,13 +115,15 @@ new_shopkeep{
     end
 }
 
-new_shopkeep{
+JAND.Shopkeeper{
     key = "hapoten",
     atlas = "keepers",
     pos = { x = 4, y = 0},
-    card_amount = 3,
+    jand_pack = "giiko",
+    config = {card_amount = 3,
     quips = 4,
     shopname = "Rotten Playroom",
+    },
     restock = function ()
         for i = 1, 3 do
             local card = SMODS.create_card({set = "Joker", area = G.jand_shop, bypass_discovery_center = true})
